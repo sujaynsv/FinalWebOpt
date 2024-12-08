@@ -10,9 +10,9 @@ export const api = {
     return response.data;
   },
 
-  // Fetch order details
-  getOrderDetails: async () => {
-    const response = await axios.get(`${API_URL}/order-details`);
+  // Fetch order details by ID
+  getOrderDetails: async (id: string) => {
+    const response = await axios.get(`${API_URL}/orders/${id}`); // Updated to use the specific order ID
     return response.data;
   },
 

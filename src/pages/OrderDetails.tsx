@@ -1,35 +1,40 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Package, User, MapPin, Clock } from 'lucide-react';
-import { generateTimeSlots, generateAISlots } from '../lib/utils';
+import { Package, User, Clock } from 'lucide-react';
+import { api } from '../lib/api';
 
 export function OrderDetails() {
   const { id } = useParams();
-  const [selectedSlot, setSelectedSlot] = useState('');
+  const [order, setOrder] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const mockOrder = {
-    id,
-    trackingNumber: 'TRK123456789',
-    status: 'In Transit',
-    sender: {
-      name: 'John Doe',
-      phone: '+91 98765 43210',
-      address: '456 Business Park, Delhi',
-    },
-    receiver: {
-      name: 'Jane Smith',
-      phone: '+91 98765 43211',
-      address: '123 Main St, Mumbai',
-    },
-    product: {
-      name: 'Electronics Package',
-      weight: '2.5 kg',
-      dimensions: '30x20x15 cm',
-    },
-  };
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      try {
+        const data = await api.getOrderDetails(id); // Fetch order details by ID
+        setOrder(data);
+      } catch (err) {
+        setError('Error fetching order details');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const aiSuggestedSlots = generateAISlots([]);
-  const availableSlots = generateTimeSlots();
+    fetchOrderDetails();
+  }, [id]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>{error}</div>;
+  }
+
+  if (!order) {
+    return <div>No order found.</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -39,7 +44,10 @@ export function OrderDetails() {
             Order Details
           </h3>
           <p className="mt-1 max-w-2xl text-sm text-gray-500">
-            Tracking Number: {mockOrder.trackingNumber}
+            Order ID: {order.order_id}
+          </p>
+          <p className="mt-1 max-w-2xl text-sm text-gray-500">
+            Delivery Status: {order.delivery_status}
           </p>
         </div>
 
@@ -48,77 +56,80 @@ export function OrderDetails() {
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500 flex items-center">
                 <User className="h-5 w-5 mr-2" />
-                Sender
+                Customer ID
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
-                <p>{mockOrder.sender.name}</p>
-                <p>{mockOrder.sender.phone}</p>
-                <p>{mockOrder.sender.address}</p>
+                {order.customer_id}
               </dd>
             </div>
 
             <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500 flex items-center">
                 <User className="h-5 w-5 mr-2" />
-                Receiver
+                Postman ID
               </dt>
               <dd className="mt-1 text-sm text-gray-900">
-                <p>{mockOrder.receiver.name}</p>
-                <p>{mockOrder.receiver.phone}</p>
-                <p>{mockOrder.receiver.address}</p>
+                {order.postman_id}
               </dd>
             </div>
 
-            <div className="sm:col-span-2">
-              <dt className="text-sm font-medium text-gray-500 flex items-center">
-                <Package className="h-5 w-5 mr-2" />
-                Package Details
-              </dt>
-              <dd className="mt-1 text-sm text-gray-900">
-                <p>Name: {mockOrder.product.name}</p>
-                <p>Weight: {mockOrder.product.weight}</p>
-                <p>Dimensions: {mockOrder.product.dimensions}</p>
-              </dd>
-            </div>
-
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-1">
               <dt className="text-sm font-medium text-gray-500 flex items-center">
                 <Clock className="h-5 w-5 mr-2" />
-                AI Suggested Time Slots
+                Order Date
               </dt>
-              <dd className="mt-1 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                {aiSuggestedSlots.map((slot) => (
-                  <button
-                    key={slot}
-                    onClick={() => setSelectedSlot(slot)}
-                    className={`px-4 py-2 text-sm font-medium rounded-md ${
-                      selectedSlot === slot
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                ))}
+              <dd className="mt-1 text-sm text-gray-900">
+                {new Date(order.order_date).toLocaleDateString()}
               </dd>
             </div>
 
-            <div className="sm:col-span-2">
-              <dt className="text-sm font-medium text-gray-500">Available Time Slots</dt>
-              <dd className="mt-1 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {availableSlots.map((slot) => (
-                  <button
-                    key={slot}
-                    onClick={() => setSelectedSlot(slot)}
-                    className={`px-4 py-2 text-sm font-medium rounded-md ${
-                      selectedSlot === slot
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {slot}
-                  </button>
-                ))}
+            <div className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500 flex items-center">
+                <Clock className="h-5 w-5 mr-2" />
+                Delivery Date
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {new Date(order.delivery_date).toLocaleDateString()}
+              </dd>
+            </div>
+
+            <div className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500 flex items-center">
+                <Clock className="h-5 w-5 mr-2" />
+                Predicted Slot
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {order.slot_predicted}
+              </dd>
+            </div>
+
+            <div className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500 flex items-center">
+                <Clock className="h-5 w-5 mr-2" />
+                Confirmed Slot
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {order.slot_confirmed}
+              </dd>
+            </div>
+
+            <div className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500 flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                Item Type
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {order.item_type}
+              </dd>
+            </div>
+
+            <div className="sm:col-span-1">
+              <dt className="text-sm font-medium text-gray-500 flex items-center">
+                <Package className="h-5 w-5 mr-2" />
+                Pincode
+              </dt>
+              <dd className="mt-1 text-sm text-gray-900">
+                {order.pincode}
               </dd>
             </div>
           </dl>

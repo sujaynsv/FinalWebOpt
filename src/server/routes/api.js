@@ -16,14 +16,18 @@ router.get('/customers', async (req, res) => {
 });  
 
 // Get all order details
-router.get('/order-details', async (req, res) => {
-  try {
-    const orders = await OrderDetails.find();
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching order details' });
-  }
-});
+// Get single order
+router.get('/:id', async (req, res) => {
+    try {
+      const order = await OrderDetails.findById(req.params.id);
+      if (!order) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching order' });
+    }
+  });
 
 // Get all postmen
 router.get('/postmen', async (req, res) => {
