@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { api } from '../lib/api.ts'; // Assuming you have an API utility
 import { useNavigate } from 'react-router-dom';
+import { api } from '../lib/api';
 
 export function Dashboard() {
   const [customers, setCustomers] = useState([]);
@@ -10,7 +10,7 @@ export function Dashboard() {
     const fetchCustomers = async () => {
       try {
         const data = await api.getCustomers();
-        console.log('Fetched customers:', data); // Log the fetched data
+        console.log('Fetched customers:', data);
         setCustomers(data);
       } catch (error) {
         console.error('Error fetching customers:', error);
@@ -21,9 +21,8 @@ export function Dashboard() {
   }, []);
 
   const handleViewDetails = (customerId: string) => {
-    navigate(`/customer/${customerId}`); // Redirect to the customer details page
+    navigate(`/orders/${customerId}`); // This should match the defined route
   };
-
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Customer Dashboard</h1>

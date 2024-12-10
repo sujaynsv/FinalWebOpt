@@ -14,6 +14,27 @@ router.get('/customers', async (req, res) => {
       res.status(500).json({ message: 'Error fetching customers' });
     }
 });  
+router.get('/order/:customer_id', async (req, res) => {
+  try {
+    // Retrieve the customer_id from the route parameter
+    const customerId = req.params.customer_id;
+
+    // Fetch the order details where the customer_id matches the provided id
+    const details = await OrderDetails.find({ customer_id: customerId });
+
+    // Check if order details were found
+    if (details.length === 0) {
+      return res.status(404).send('No order details found for the given customer ID.');
+    }
+
+    // Send the found order details in response
+    res.json(details);
+  } catch (error) {
+    // Handle possible errors during the database operation
+    res.status(500).send('Failed to retrieve order details: ' + error.message);
+  }
+});
+
 
 // Get all order details
 // Get single order

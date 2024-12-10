@@ -1,4 +1,3 @@
-import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { PrivateRoute } from './components/PrivateRoute';
@@ -8,6 +7,7 @@ import { Dashboard } from './pages/Dashboard';
 import { OrderDetails } from './pages/OrderDetails';
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
+import { CustomerDetails } from './pages/CustomerDetails';
 
 export function App() {
   return (
@@ -26,12 +26,12 @@ export function App() {
             }
           >
             <Route index element={<Dashboard />} />
-            <Route path="order/:id" element={<OrderDetails />} />
+            <Route path="customer/:customerId" element={<CustomerDetails />} />
+            <Route path="orders/:customerId" element={<OrderDetails />} /> 
+            {/* Ensure this route is defined */}
           </Route>
         </Routes>
       </BrowserRouter>
     </AuthProvider>
   );
 }
-
-export default App;
